@@ -15,15 +15,15 @@ export function Pagination({ currentPage, totalPages, onPageChange }: Pagination
         className="w-8 h-8 flex items-center justify-center rounded-full disabled:opacity-50"
         aria-label="Previous page"
       >
-        ←
+        ◀
       </button>
 
       {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
         <button
           key={page}
           onClick={() => onPageChange(page)}
-          className={`w-8 h-8 flex items-center justify-center rounded-full ${
-            currentPage === page ? "bg-gray-800 text-white" : "bg-gray-200 hover:bg-gray-300"
+          className={`w-[37px] h-[34px] flex items-center justify-center rounded-[8px] ${
+            currentPage === page ? "bg-[#2C2C2C] text-white" : "bg-[#AEAEAE] hover:bg-[#2C2C2C] text-white"
           }`}
         >
           {page}
@@ -36,7 +36,7 @@ export function Pagination({ currentPage, totalPages, onPageChange }: Pagination
         className="w-8 h-8 flex items-center justify-center rounded-full disabled:opacity-50"
         aria-label="Next page"
       >
-        →
+        ▶
       </button>
     </div>
   )
