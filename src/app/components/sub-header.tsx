@@ -40,7 +40,7 @@ export default function SubHeader() {
                                 alt="Icon"
                                 width={18}
                                 height={18}
-                                
+
                             />
                             <p className={`text-[13px] ${montserratSemiBold.className}`} >View schedules</p>
                         </div>
@@ -100,7 +100,7 @@ export default function SubHeader() {
 
                     {/* All Podcast */}
                     <Link
-                        href="/postcast"
+                        href="/all-podcast"
                         className="flex items-center gap-2 hover:text-gray-300 transition-colors w-full sm:w-auto justify-center sm:justify-start py-2 sm:py-0"
                     >
                        <Image

@@ -7,10 +7,15 @@ const BASE_URL = "https://api.wokpa.app/api/listeners";
  * Fetch top podcasts with pagination
  */
 export const getTopPodcasts = async (page: number = 1, perPage: number = 15): Promise<Podcast[]> => {
-  const { data } = await axios.get<PaginatedApiResponse<Podcast>>(
-    `${BASE_URL}/top-podcasts?page=${page}&per_page=${perPage}`
-  );
-  return data.data.data;
+  try {
+    const { data } = await axios.get<PaginatedApiResponse<Podcast>>(
+      `${BASE_URL}/top-podcasts?page=${page}&per_page=${perPage}`
+    );
+    return data.data.data;
+  } catch (error) {
+    console.error("Error fetching top podcasts:", error);
+    return [];
+  }
 };
 
 /**

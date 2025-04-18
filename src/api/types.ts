@@ -38,6 +38,7 @@ export interface Podcast {
 
 export interface Episode {
   id: number;
+  content_url: string;
   podcast_id: number;
   title: string;
   description: string;
