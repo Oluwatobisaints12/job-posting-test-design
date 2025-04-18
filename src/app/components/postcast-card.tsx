@@ -1,7 +1,9 @@
 import Image from "next/image"
 import { Play, Share2, Bookmark } from "lucide-react"
-import type { Podcast } from "../../../types/postcast"
 import { montserratBold, montserratMedium, montserratSemiBold } from "../../../fonts"
+
+// Import types from our API
+import type { Podcast } from "@/api/types"
 
 interface PodcastCardProps {
   podcast: Podcast

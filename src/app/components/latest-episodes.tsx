@@ -1,35 +1,24 @@
 "use client"
 
 import { useState } from "react"
-import axios from "axios"
-import { useQuery } from "@tanstack/react-query"
-import { ChevronLeft, ChevronRight } from "lucide-react"
-import { Button } from "../components/ui/button"
-import { Badge } from "../components/ui/badge"
 import { Card, CardContent } from "../components/ui/card"
+import { Button } from "../components/ui/button"
 import Link from "next/link"
 import { montserratBold, montserratMedium } from "../../../fonts"
+import { ArrowButton } from "./ui/arrow-button"
 
-// API functions
-const fetchPodcasts = async (page: number) => {
-    const { data } = await axios.get(`https://api.wokpa.app/api/listeners/episodes/latest?page=${page}&per_page=15`)
-    return data.data.data
-}
+// Import custom hook
+import { useLatestEpisodes } from "@/hooks/useEpisodes"
 
 export default function PodcastBrowser() {
     const [page, setPage] = useState(1)
 
-    // Fetch podcasts
+    // Fetch episodes using custom hook
     const {
         data: podcasts,
         isLoading,
         isError,
-    } = useQuery({
-        queryKey: ["podcasts", page],
-        queryFn: () => fetchPodcasts(page),
-        keepPreviousData: true,
-    })
-    console.log(podcasts, 'podcast2')
+    } = useLatestEpisodes(page)
 
     const handlePrevPage = () => {
         if (page > 1) {
@@ -41,17 +30,21 @@ export default function PodcastBrowser() {
         setPage((prev) => prev + 1)
     }
 
-    if (isLoading)
+    // Only show full loading state on initial load
+    const isInitialLoading = isLoading && !podcasts;
+
+    if (isInitialLoading) {
         return (
             <div className="flex justify-center items-center h-64">
                 <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
             </div>
-        )
+        );
+    }
 
-    if (isError) return <p className="text-center text-red-500 p-4">Failed to load podcasts.</p>
-    
+    if (isError) return <p className="text-center text-red-500 p-4">Failed to load podcasts.</p>;
+
     return (
-        <div className="bg-white w-full sm:px-6 max-w-[1355px] mx-auto">
+        <div className="bg-white w-full sm:px-6 mx-auto">
             {/* Trending Section */}
             <div className="mb-8 md:mb-10 lg:mb-12 pt-6 md:pt-8 lg:pt-20">
                 <div className="mb-4 md:mb-6 lg:mb-7">
@@ -61,17 +54,51 @@ export default function PodcastBrowser() {
                 </div>
 
                 <div className="relative">
+                    {/* Navigation arrows - positioned absolutely on the right */}
+                    <div className="hidden md:flex absolute top-[40%] right-[-39px] z-10 pointer-events-none">
+                        <div className="flex gap-4 pointer-events-auto">
+                            <div className="relative">
+                                <ArrowButton
+                                    direction="left"
+                                    onClick={handlePrevPage}
+                                    disabled={page === 1 || isLoading}
+                                    aria-label="Previous"
+                                    className="w-[50px] h-[50px] md:w-[60px] md:h-[60px]"
+                                />
+                                {isLoading && page > 1 && (
+                                    <div className="absolute inset-0 flex items-center justify-center">
+                                        <div className="w-5 h-5 border-t-2 border-primary rounded-full animate-spin"></div>
+                                    </div>
+                                )}
+                            </div>
+                            <div className="relative">
+                                <ArrowButton
+                                    direction="right"
+                                    onClick={handleNextPage}
+                                    disabled={isLoading}
+                                    aria-label="Next"
+                                    className="w-[50px] h-[50px] md:w-[60px] md:h-[60px]"
+                                />
+                                {isLoading && (
+                                    <div className="absolute inset-0 flex items-center justify-center">
+                                        <div className="w-5 h-5 border-t-2 border-primary rounded-full animate-spin"></div>
+                                    </div>
+                                )}
+                            </div>
+                        </div>
+                    </div>
+
                     {/* Responsive carousel/grid */}
-                    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 sm:gap-5 md:gap-6">
+                    <div className={`grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 sm:gap-5 md:gap-6 transition-opacity duration-300 ease-in-out ${isLoading ? 'opacity-60' : 'opacity-100'}`}>
                         {podcasts?.slice(0, 5).map((podcast: any) => (
-                            <Link href={`/podcast/${podcast.id}`} key={podcast.id} className="block">
-                                <Card className="cursor-pointer transition-all hover:shadow-md h-full">
+                            <Link href={`/podcast/${podcast.podcast_id}/episode/${podcast.id}`} key={podcast.id} className="block transition-all duration-300" prefetch>
+                                <Card className="cursor-pointer transition-all duration-300 hover:shadow-lg hover:translate-y-[-5px] h-full">
                                     <CardContent className="p-0 w-full">
                                         <div className="relative">
                                             <img
                                                 src={podcast.picture_url || "/placeholder.svg"}
                                                 alt={podcast.title}
-                                                className="w-full aspect-square object-cover"
+                                                className="w-full aspect-square object-cover transition-transform duration-500 ease-in-out hover:scale-105"
                                             />
                                             <div className="flex flex-row items-center mt-3 px-3">
                                                 <span className={`${montserratBold.className} text-xs text-[#828282]`}>
@@ -83,19 +110,19 @@ export default function PodcastBrowser() {
                                                 </span>
                                             </div>
                                         </div>
-                                        
+
                                         <div className="mt-2 px-3 pb-4">
                                             <h3 className={`${montserratBold.className} text-sm sm:text-base text-[#282828] line-clamp-2`}>
                                                 {podcast.title}
                                             </h3>
-                                            
+
                                             <div className="flex flex-col sm:flex-row sm:items-center mt-3 sm:mt-4">
                                                 <span className={`${montserratMedium.className} text-xs sm:text-sm text-[#282828] sm:mr-4 mb-2 sm:mb-0`}>
                                                     More episodes
                                                 </span>
-                                                
+
                                                 <div className="flex gap-2 sm:gap-3 items-center">
-                                                    <Button variant="ghost" size="icon" className="h-6 w-6 p-0">
+                                                    <Button variant="ghost" size="icon" className="h-6 w-6 p-0 transition-all duration-300 hover:bg-[#d1d1d1] hover:scale-110">
                                                         <svg width="24" height="24" viewBox="0 0 30 30" fill="none" xmlns="http://www.w3.org/2000/svg">
                                                             <circle cx="15" cy="15" r="15" fill="#E1E1E1" />
                                                             <g clipPath="url(#clip0_1_462)">
@@ -108,8 +135,8 @@ export default function PodcastBrowser() {
                                                             </defs>
                                                         </svg>
                                                     </Button>
-                                                    
-                                                    <Button variant="ghost" size="icon" className="h-6 w-6 p-0">
+
+                                                    <Button variant="ghost" size="icon" className="h-6 w-6 p-0 transition-all duration-300 hover:bg-[#d1d1d1] hover:scale-110">
                                                         <svg width="24" height="24" viewBox="0 0 30 30" fill="none" xmlns="http://www.w3.org/2000/svg">
                                                             <circle cx="15" cy="15" r="15" fill="#E1E1E1" />
                                                             <g clipPath="url(#clip0_1_492)">
@@ -131,28 +158,37 @@ export default function PodcastBrowser() {
                         ))}
                     </div>
 
-                    {/* Pagination buttons - repositioned for responsiveness */}
-                    <div className="flex justify-center md:justify-end mt-6 md:mt-8">
-                        <div className="flex gap-2">
-                            <Button
-                                variant="outline"
-                                size="icon"
-                                onClick={handlePrevPage}
-                                disabled={page === 1}
-                                className="rounded-full h-8 w-8 md:h-10 md:w-10"
-                            >
-                                <ChevronLeft className="h-3 w-3 md:h-4 md:w-4" />
-                                <span className="sr-only">Previous</span>
-                            </Button>
-                            <Button 
-                                variant="outline" 
-                                size="icon" 
-                                onClick={handleNextPage} 
-                                className="rounded-full h-8 w-8 md:h-10 md:w-10"
-                            >
-                                <ChevronRight className="h-3 w-3 md:h-4 md:w-4" />
-                                <span className="sr-only">Next</span>
-                            </Button>
+                    {/* Mobile pagination buttons */}
+                    <div className="flex md:hidden justify-center mt-6">
+                        <div className="flex gap-4">
+                            <div className="relative">
+                                <ArrowButton
+                                    direction="left"
+                                    onClick={handlePrevPage}
+                                    disabled={page === 1 || isLoading}
+                                    aria-label="Previous"
+                                    className="w-[50px] h-[50px]"
+                                />
+                                {isLoading && page > 1 && (
+                                    <div className="absolute inset-0 flex items-center justify-center">
+                                        <div className="w-4 h-4 border-t-2 border-primary rounded-full animate-spin"></div>
+                                    </div>
+                                )}
+                            </div>
+                            <div className="relative">
+                                <ArrowButton
+                                    direction="right"
+                                    onClick={handleNextPage}
+                                    disabled={isLoading}
+                                    aria-label="Next"
+                                    className="w-[50px] h-[50px]"
+                                />
+                                {isLoading && (
+                                    <div className="absolute inset-0 flex items-center justify-center">
+                                        <div className="w-4 h-4 border-t-2 border-primary rounded-full animate-spin"></div>
+                                    </div>
+                                )}
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -166,14 +202,14 @@ export default function PodcastBrowser() {
 
                 <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-5">
                     {podcasts?.slice(5, 10).map((podcast: any) => (
-                        <Link href={`/podcast/${podcast.id}`} key={podcast.id}>
-                            <Card className="overflow-hidden cursor-pointer hover:shadow-md">
+                        <Link href={`/podcast/${podcast.podcast_id}/episode/${podcast.id}`} key={podcast.id} className="transition-all duration-300" prefetch>
+                            <Card className="overflow-hidden cursor-pointer transition-all duration-300 hover:shadow-lg hover:translate-y-[-5px]">
                                 <CardContent className="p-0">
                                     <div className="relative">
                                         <img
                                             src={podcast.picture_url || "/placeholder.svg"}
                                             alt={podcast.title}
-                                            className="w-full h-[180px] object-cover"
+                                            className="w-full h-[180px] object-cover transition-transform duration-500 ease-in-out hover:scale-105"
                                         />
                                         <div className="absolute bottom-2 left-2">
                                             <Badge variant="secondary" className="bg-black/70 text-white">

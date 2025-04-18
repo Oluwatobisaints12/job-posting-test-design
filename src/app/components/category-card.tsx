@@ -7,7 +7,7 @@ import { Button } from "./ui/button";
 
 export default function CategoryCard({ category }: { category: { name: string; image_url: string } }) {
     return (
-<div className="bg-[#F4F4F4] rounded-[5px] w-[265px] h-[367px] px-[21px] py-[22px] border-b-4 border-b-[#D5D3D3] shadow-[0_4px_10px_-1px_rgba(0,0,0,0.2)] overflow-hidden">
+<div className="bg-[#F4F4F4] rounded-[5px] w-[265px] h-[367px] px-[21px] py-[22px] border-b-4 border-b-[#D5D3D3] shadow-[0_4px_10px_-1px_rgba(0,0,0,0.2)] overflow-hidden transition-all duration-300 hover:shadow-[0_8px_15px_-1px_rgba(0,0,0,0.3)] hover:translate-y-[-5px] cursor-pointer">
                 <div className="relative w-full h-[234px]">
                 <Image
                     src={category.image_url}
@@ -26,7 +26,7 @@ export default function CategoryCard({ category }: { category: { name: string; i
             <div className="mt-[1rem]">
                 <h3 className={`text-[#282828] text-[1.125rem] ${montserratBold.className}`}>{category.name}</h3>
                 <div className="flex gap-[11px] items-center mt-[14px]">
-                                                    <Button variant="ghost" size="icon" className="h-6 w-6">
+                                                    <Button variant="ghost" size="icon" className="h-6 w-6 transition-all duration-300 hover:bg-[#d1d1d1] hover:scale-110">
                                                         <svg width="30" height="30" viewBox="0 0 30 30" fill="none" xmlns="http://www.w3.org/2000/svg">
                                                             <circle cx="15" cy="15" r="15" fill="#E1E1E1" />
                                                             <g clipPath="url(#clip0_1_462)">
@@ -40,7 +40,7 @@ export default function CategoryCard({ category }: { category: { name: string; i
                                                         </svg>
 
                                                     </Button>
-                                                    <Button variant="ghost" size="icon" className="h-6 w-6">
+                                                    <Button variant="ghost" size="icon" className="h-6 w-6 transition-all duration-300 hover:bg-[#d1d1d1] hover:scale-110">
                                                         <svg width="30" height="30" viewBox="0 0 30 30" fill="none" xmlns="http://www.w3.org/2000/svg">
                                                             <circle cx="15" cy="15" r="15" fill="#E1E1E1" />
                                                             <g clipPath="url(#clip0_1_492)">

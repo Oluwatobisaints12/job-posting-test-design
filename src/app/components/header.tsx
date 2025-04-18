@@ -37,7 +37,7 @@ export default function Header() {
 
   return (
     <header className="w-full border-b bg-white">
-      <div className="container mx-auto w-full max-w-[1355px] py-3">
+      <div className="container mx-auto w-full max-w-[1440px] px-4 sm:px-6 lg:px-8 py-3">
         <div className="flex items-center ">
           {/* Logo */}
           <div className="flex-shrink-0 mr-auto">
