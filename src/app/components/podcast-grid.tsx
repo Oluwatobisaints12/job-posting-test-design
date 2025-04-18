@@ -1,43 +1,22 @@
 "use client"
 
-import { useEffect, useState } from "react"
+import { useState } from "react"
 import { PodcastCard } from "./postcast-card"
 import { Pagination } from "./pagination-button"
-import type { Podcast } from "../../../types/postcast"
+
+// Import custom hook and types
+import { useTopPodcasts } from "@/hooks/usePodcasts"
+import type { Podcast } from "@/api/types"
 
 export function PodcastGrid() {
-  const [podcasts, setPodcasts] = useState<Podcast[]>([])
-  const [loading, setLoading] = useState(true)
-  const [error, setError] = useState<string | null>(null)
   const [currentPage, setCurrentPage] = useState(1)
-  const [totalPages, setTotalPages] = useState(1)
+  const [totalPages, setTotalPages] = useState(2) // Hardcoded for now
 
-  useEffect(() => {
-    async function fetchPodcasts() {
-      try {
-        setLoading(true)
-        const response = await fetch(`https://api.wokpa.app/api/listeners/top-podcasts?page=${currentPage}&per_page=10`)
+  // Use custom hook to fetch podcasts
+  const { data: podcasts, isLoading: loading, isError } = useTopPodcasts(currentPage, 10)
 
-        if (!response.ok) {
-          throw new Error("Failed to fetch podcasts")
-        }
-
-        const data = await response.json()
-        setPodcasts(data.data.data)
-
-        // Calculate total pages based on total count if available
-        // For now, we'll just set it to 2 to match the screenshot
-        setTotalPages(2)
-      } catch (err) {
-        setError("Failed to load podcasts. Please try again later.")
-        console.error(err)
-      } finally {
-        setLoading(false)
-      }
-    }
-
-    fetchPodcasts()
-  }, [currentPage])
+  // Derive error state from isError
+  const error = isError ? "Failed to load podcasts. Please try again later." : null
 
   const handlePageChange = (page: number) => {
     setCurrentPage(page)

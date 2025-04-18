@@ -1,8 +1,6 @@
 "use client"
 
 import { useState } from "react"
-import axios from "axios"
-import { useQuery } from "@tanstack/react-query"
 import { ChevronLeft, ChevronRight } from "lucide-react"
 import { Button } from "../components/ui/button"
 import { Badge } from "../components/ui/badge"
@@ -10,25 +8,18 @@ import { Card, CardContent } from "../components/ui/card"
 import Link from "next/link"
 import { montserratBold, montserratSemiBold } from "../../../fonts"
 
-// API functions
-const fetchPodcasts = async (page: number) => {
-  const { data } = await axios.get(`https://api.wokpa.app/api/listeners/top-podcasts?page=${page}&per_page=15`)
-  return data.data.data
-}
+// Import custom hook
+import { useTopPodcasts } from "@/hooks/usePodcasts"
 
 export default function PodcastBrowser() {
   const [page, setPage] = useState(1)
 
-  // Fetch podcasts
+  // Fetch podcasts using custom hook
   const {
     data: podcasts,
     isLoading,
     isError,
-  } = useQuery({
-    queryKey: ["podcasts", page],
-    queryFn: () => fetchPodcasts(page),
-    keepPreviousData: true,
-  })
+  } = useTopPodcasts(page)
 
   const handlePrevPage = () => {
     if (page > 1) {
@@ -50,7 +41,7 @@ export default function PodcastBrowser() {
   if (isError) return <p className="text-center text-red-500 p-4">Failed to load podcasts.</p>
 
   return (
-    <div className="bg-white w-full max-w-[1355px]  mx-auto">
+    <div className="bg-white w-full mx-auto">
       {/* Trending Section */}
       <div className=" pt-[5.3125rem]">
         <div className="">

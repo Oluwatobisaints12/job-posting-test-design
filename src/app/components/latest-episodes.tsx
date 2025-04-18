@@ -1,8 +1,6 @@
 "use client"
 
 import { useState } from "react"
-import axios from "axios"
-import { useQuery } from "@tanstack/react-query"
 import { ChevronLeft, ChevronRight } from "lucide-react"
 import { Button } from "../components/ui/button"
 import { Badge } from "../components/ui/badge"
@@ -10,26 +8,18 @@ import { Card, CardContent } from "../components/ui/card"
 import Link from "next/link"
 import { montserratBold, montserratMedium } from "../../../fonts"
 
-// API functions
-const fetchPodcasts = async (page: number) => {
-    const { data } = await axios.get(`https://api.wokpa.app/api/listeners/episodes/latest?page=${page}&per_page=15`)
-    return data.data.data
-}
+// Import custom hook
+import { useLatestEpisodes } from "@/hooks/useEpisodes"
 
 export default function PodcastBrowser() {
     const [page, setPage] = useState(1)
 
-    // Fetch podcasts
+    // Fetch episodes using custom hook
     const {
         data: podcasts,
         isLoading,
         isError,
-    } = useQuery({
-        queryKey: ["podcasts", page],
-        queryFn: () => fetchPodcasts(page),
-        keepPreviousData: true,
-    })
-    console.log(podcasts, 'podcast2')
+    } = useLatestEpisodes(page)
 
     const handlePrevPage = () => {
         if (page > 1) {
@@ -49,9 +39,9 @@ export default function PodcastBrowser() {
         )
 
     if (isError) return <p className="text-center text-red-500 p-4">Failed to load podcasts.</p>
-    
+
     return (
-        <div className="bg-white w-full sm:px-6 max-w-[1355px] mx-auto">
+        <div className="bg-white w-full sm:px-6 mx-auto">
             {/* Trending Section */}
             <div className="mb-8 md:mb-10 lg:mb-12 pt-6 md:pt-8 lg:pt-20">
                 <div className="mb-4 md:mb-6 lg:mb-7">
@@ -83,17 +73,17 @@ export default function PodcastBrowser() {
                                                 </span>
                                             </div>
                                         </div>
-                                        
+
                                         <div className="mt-2 px-3 pb-4">
                                             <h3 className={`${montserratBold.className} text-sm sm:text-base text-[#282828] line-clamp-2`}>
                                                 {podcast.title}
                                             </h3>
-                                            
+
                                             <div className="flex flex-col sm:flex-row sm:items-center mt-3 sm:mt-4">
                                                 <span className={`${montserratMedium.className} text-xs sm:text-sm text-[#282828] sm:mr-4 mb-2 sm:mb-0`}>
                                                     More episodes
                                                 </span>
-                                                
+
                                                 <div className="flex gap-2 sm:gap-3 items-center">
                                                     <Button variant="ghost" size="icon" className="h-6 w-6 p-0">
                                                         <svg width="24" height="24" viewBox="0 0 30 30" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -108,7 +98,7 @@ export default function PodcastBrowser() {
                                                             </defs>
                                                         </svg>
                                                     </Button>
-                                                    
+
                                                     <Button variant="ghost" size="icon" className="h-6 w-6 p-0">
                                                         <svg width="24" height="24" viewBox="0 0 30 30" fill="none" xmlns="http://www.w3.org/2000/svg">
                                                             <circle cx="15" cy="15" r="15" fill="#E1E1E1" />
@@ -144,10 +134,10 @@ export default function PodcastBrowser() {
                                 <ChevronLeft className="h-3 w-3 md:h-4 md:w-4" />
                                 <span className="sr-only">Previous</span>
                             </Button>
-                            <Button 
-                                variant="outline" 
-                                size="icon" 
-                                onClick={handleNextPage} 
+                            <Button
+                                variant="outline"
+                                size="icon"
+                                onClick={handleNextPage}
                                 className="rounded-full h-8 w-8 md:h-10 md:w-10"
                             >
                                 <ChevronRight className="h-3 w-3 md:h-4 md:w-4" />

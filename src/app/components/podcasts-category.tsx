@@ -2,29 +2,14 @@ import Link from "next/link"
 import CategoryCard from "./category-card"
 import { montserratBold } from "../../../fonts"
 
-async function getTopCategories() {
-  try {
-    const response = await fetch("https://api.wokpa.app/api/listeners/top-categories", {
-      cache: "no-store",
-    })
-
-    if (!response.ok) {
-      throw new Error(`Failed to fetch: ${response.status}`)
-    }
-
-    return response.json()
-  } catch (error) {
-    console.error("Error fetching top categories:", error)
-    return { data: [] }
-  }
-}
+// Import server API function
+import { getTopCategories } from "@/api"
 
 export default async function NewsAndStorytelling() {
-  const categoriesData = await getTopCategories()
-  const categories = categoriesData?.data || []
+  const categories = await getTopCategories()
 
   return (
-    <div className="w-full max-w-[1355px] mx-auto gap-[25px] mt-[4.4375rem] overflow-x-hidden">
+    <div className="w-full mx-auto gap-[25px] mt-[4.4375rem] overflow-x-hidden">
       <div className="flex items-center justify-between mb-[2.4375rem]">
       <h2 className="text-xl font-medium text-gray-700 flex items-center">
           <span className="h-[16px] bg-[#CC0001] w-[3px] mr-[5px]"></span>

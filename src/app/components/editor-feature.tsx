@@ -1,55 +1,17 @@
 "use client"
 
-import { useQuery } from "@tanstack/react-query"
 import Image from "next/image"
-import { Play, Clock, Headphones } from "lucide-react"
+import { Play } from "lucide-react"
 import { Skeleton } from "./ui/skeleton"
 import { montserratBold, montserratMedium, montserratSemiBold } from "../../../fonts"
 
-// Corrected Podcast interface based on API response
-interface Podcast {
-  created_at: number
-  id: number
-  title: string
-  description: string
-  picture_url: string
-  cover_picture_url: string
-  total_plays: number
-  total_episodes: number
-  duration: string
-  category_name: string
-  publisher: {
-    id: number
-    first_name: string
-    last_name: string
-    company_name: string
-    profile_image_url: string
-  }
-}
-
-interface PodcastsResponse {
-  data: {
-    data: Podcast[]
-  }
-  message: string
-}
-
-// Fetch podcasts from API
-const fetchPodcasts = async (): Promise<PodcastsResponse> => {
-  const response = await fetch("https://api.wokpa.app/api/listeners/episodes/latest?page=1&per_page=15")
-
-  if (!response.ok) {
-    throw new Error("Failed to fetch podcasts")
-  }
-
-  return response.json()
-}
+// Import custom hook and types
+import { useLatestEpisodes } from "@/hooks/useEpisodes"
+import { Episode } from "@/api/types"
 
 export default function PopularPodcasts() {
-  const { data, isLoading, error } = useQuery<PodcastsResponse, Error>({
-    queryKey: ["popularPodcasts"],
-    queryFn: fetchPodcasts,
-  })
+  // Use the custom hook to fetch latest episodes
+  const { data: episodes, isLoading, isError: error } = useLatestEpisodes(1, 15)
 
   if (isLoading) {
     return <PodcastsLoadingSkeleton />
@@ -65,10 +27,10 @@ export default function PopularPodcasts() {
     )
   }
 
-  const podcasts = data?.data?.data.slice(0, 3) || []
+  const podcasts = episodes?.slice(0, 3) || []
 
   return (
-    <div className="bg-[#F6F6F6] container mt-[3.1875rem] justify-center mx-auto lg:w-full lg:max-w-[1355px] lg:py-[1.6875rem] ">
+    <div className="bg-[#F6F6F6] w-full mt-[3.1875rem] justify-center mx-auto lg:py-[1.6875rem]">
      <div className="flex flex-col p-4">
         <h1 className={`text-[#282828] text-[1.5rem] ${montserratBold.className}`}>EDITOR'S PICK</h1>
         <h2 className={`text-[#5A5A5A] text-[1rem] mt-[6px] ${montserratSemiBold.className}`}>Featured Episodes</h2>
@@ -97,16 +59,16 @@ export default function PopularPodcasts() {
 })}
 
       </div>
-      
+
       )}
     </div>
   )
 }
 
-function PodcastCard({ podcast, isFirst = false }: { podcast: Podcast; isFirst?: boolean }) {
+function PodcastCard({ podcast, isFirst = false }: { podcast: Episode; isFirst?: boolean }) {
   return (
     <div className=" bg-[#F6F6F6]">
-      
+
       <div         className={`relative ${isFirst ? "w-[670px] h-[561px]" : "aspect-square"} `}
       >
         <Image
@@ -121,7 +83,7 @@ function PodcastCard({ podcast, isFirst = false }: { podcast: Podcast; isFirst?:
           </button>
         </div>
       </div>
-  
+
       {/* Only show this for non-first items */}
       {!isFirst && (
         <div className="bg-white p-[1rem]">
@@ -129,18 +91,18 @@ function PodcastCard({ podcast, isFirst = false }: { podcast: Podcast; isFirst?:
           <p className="text-sm text-gray-600 line-clamp-1 mt-1">
             {podcast?.publisher?.first_name} {podcast?.publisher?.last_name}
           </p>
-  
+
           <div className="mt-3 flex items-center text-xs text-gray-500 space-x-3">
             <div className="flex flex-row items-center">
               <span className={`${montserratMedium.className} text-[13px]`}>{formatDate(podcast.created_at || 0)}</span>
-              
+
             <span className={`${montserratMedium.className} text-[13px]`}>{formatDuration(podcast.duration)}</span>
             </div>
-           
-           
-        
+
+
+
           </div>
-  
+
           {/* <div className="mt-3">
             <span className="inline-block bg-gray-100 rounded-full px-3 py-1 text-xs font-semibold text-gray-700">
               {podcast.category_name || "Podcast"}
@@ -150,7 +112,7 @@ function PodcastCard({ podcast, isFirst = false }: { podcast: Podcast; isFirst?:
       )}
     </div>
   );
-  
+
 }
 
 function PodcastsLoadingSkeleton() {

@@ -1,69 +1,39 @@
 "use client"
 import { useParams, useRouter } from "next/navigation"
-import axios from "axios"
-import { useQuery } from "@tanstack/react-query"
 import { ArrowLeft, Play } from "lucide-react"
 import { Button } from "../../components/ui/button"
 import { Badge } from "../../components/ui/badge"
 import { Card, CardContent } from "../../components/ui/card"
 import Link from "next/link"
-import Header from "@/app/components/header"
 import NewsletterSignup from "@/app/components/get-me-in"
-import SubHeader from "@/app/components/sub-header"
-import Footer from "@/app/components/footer"
 
-// API functions
-const fetchPodcastDetails = async (id: string) => {
-  const { data } = await axios.get(`https://api.wokpa.app/api/listeners/podcasts/${id}`)
-  return data.data
-}
-
-const fetchEpisodes = async (id: string) => {
-  const { data } = await axios.get(`https://api.wokpa.app/api/listeners/podcasts/${id}/episodes?page=1&per_page=15`)
-  return data.data.data
-}
-
-const fetchRelatedPodcasts = async () => {
-  const { data } = await axios.get(`https://api.wokpa.app/api/listeners/top-podcasts?page=1&per_page=5`)
-  return data.data.data
-}
+// Import custom hooks
+import { usePodcastDetails, useRelatedPodcasts } from "@/hooks/usePodcasts"
+import { usePodcastEpisodes } from "@/hooks/useEpisodes"
 
 export default function PodcastDetailPage() {
   const params = useParams()
   const router = useRouter()
   const podcastId = params.id as string
 
-  // Fetch podcast details
+  // Fetch podcast details using custom hook
   const {
     data: podcast,
     isLoading: podcastLoading,
     isError: podcastError,
-  } = useQuery({
-    queryKey: ["podcast", podcastId],
-    queryFn: () => fetchPodcastDetails(podcastId),
-    enabled: !!podcastId,
-  })
+  } = usePodcastDetails(podcastId)
 
-  // Fetch episodes
+  // Fetch episodes using custom hook
   const {
     data: episodes,
     isLoading: episodesLoading,
     isError: episodesError,
-  } = useQuery({
-    queryKey: ["episodes", podcastId],
-    queryFn: () => fetchEpisodes(podcastId),
-    enabled: !!podcastId,
-  })
+  } = usePodcastEpisodes(podcastId)
 
-  // Fetch related podcasts
+  // Fetch related podcasts using custom hook
   const {
     data: relatedPodcasts,
-    isLoading: relatedLoading,
-    isError: relatedError,
-  } = useQuery({
-    queryKey: ["relatedPodcasts"],
-    queryFn: fetchRelatedPodcasts,
-  })
+  } = useRelatedPodcasts(5)
 
   // Handle back navigation
   const handleBack = () => {
@@ -82,8 +52,6 @@ export default function PodcastDetailPage() {
 
   return (
     <div>
-        <Header />
-        <SubHeader />
         <NewsletterSignup />
         <div className="max-w-[1362px] mx-auto p-4">
       <Button variant="ghost" onClick={handleBack} className="mb-6">
@@ -187,10 +155,8 @@ export default function PodcastDetailPage() {
         </div>
       </div>
     </div>
-    <Footer />
-        
     </div>
-   
+
   )
 }
 
